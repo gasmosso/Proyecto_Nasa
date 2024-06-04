@@ -7,43 +7,22 @@ from ...config import config
 import requests
 
 def getAllImages(input=None):
-    try:
-        # Obtener la colección de imágenes desde el módulo de transporte
-        json_collection = transport.getAllImages(input)
-        
-        # Mapear la colección JSON a objetos NASACard
-        images = []
-        for item in json_collection:
-            if 'links' in item and len(item['links']) > 0 and 'href' in item['links'][0]:
-                try:
-                    nasa_card = mapper.NASACard(
-                        title=item['data'][0]['title'],
-                        description=item['data'][0]['description'],
-                        image_url=item['links'][0]['href'],
-                        date=item['data'][0]['date_created']
-                    )
-                    images.append(nasa_card)
-                except KeyError as e:
-                    print(f"Error al mapear el objeto {item}: {e}")
-            else:
-                print(f"El objeto {item} no contiene la clave 'href' o la lista 'links' está vacía")
-        
-        return images
-    except requests.RequestException as e:
-        print(f"Error al realizar la solicitud a la API de la NASA: {e}")
-        return []
-
-
-# def getAllImages(input=None):
-#     # obtiene un listado de imágenes desde transport.py y lo guarda en un json_collection.
-#     # ¡OJO! el parámetro 'input' indica si se debe buscar por un valor introducido en el buscador.
-#     json_collection = []
-
-#     images = []
-
-#     # recorre el listado de objetos JSON, lo transforma en una NASACard y lo agrega en el listado de images. Ayuda: ver mapper.py.
-
-#     return images
+    # Obtener la colección de imágenes desde el módulo de transporte
+    json_collection = transport.getAllImages(input)
+    
+    # Mapear la colección JSON a objetos NASACard
+    images = [
+        mapper.NASACard(
+            title=item['data'][0]['title'],
+            description=item['data'][0]['description'],
+            image_url=item['links'][0]['href'],
+            date=item['data'][0]['date_created']
+        )
+        for item in json_collection
+        if 'links' in item and item['links'] and 'href' in item['links'][0]
+    ]
+    
+    return images
 
 
 def getImagesBySearchInputLike(input):
